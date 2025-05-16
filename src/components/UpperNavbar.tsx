@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import {
   FaSearch,
   FaShoppingCart,
@@ -14,10 +16,10 @@ const UpperNavbar: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
-  const username = 'John Doe'; // Example user name for alt text
+  const username = 'John Doe'; // Example user name
 
-  // Debounce handler for search
   const debounce = (func: (...args: any[]) => void, delay: number) => {
     let timer: number | undefined;
     return (...args: any[]) => {
@@ -30,7 +32,6 @@ const UpperNavbar: React.FC = () => {
     console.log(`Searching for: ${searchQuery}`);
   }, [searchQuery]);
 
-  // Debounced version of handleSearch on input change
   const debouncedSearch = useCallback(
     debounce(() => {
       handleSearch();
@@ -44,7 +45,7 @@ const UpperNavbar: React.FC = () => {
   };
 
   const handleSettings = () => {
-    alert('Navigate to Settings page or open settings modal.');
+    navigate('/settings');
     setDropdownOpen(false);
   };
 
@@ -53,7 +54,6 @@ const UpperNavbar: React.FC = () => {
     setDropdownOpen(false);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -64,7 +64,6 @@ const UpperNavbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close dropdown on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -75,7 +74,6 @@ const UpperNavbar: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Toggle dark mode class on <html>
   useEffect(() => {
     const html = document.documentElement;
     if (darkMode) {
@@ -85,7 +83,6 @@ const UpperNavbar: React.FC = () => {
     }
   }, [darkMode]);
 
-  // Manage focus trap inside dropdown when open
   useEffect(() => {
     if (!dropdownOpen) return;
 
@@ -100,13 +97,11 @@ const UpperNavbar: React.FC = () => {
       if (e.key !== 'Tab' || !focusableElements) return;
 
       if (e.shiftKey) {
-        // Shift + Tab
         if (document.activeElement === firstElement) {
           e.preventDefault();
           lastElement?.focus();
         }
       } else {
-        // Tab
         if (document.activeElement === lastElement) {
           e.preventDefault();
           firstElement?.focus();
@@ -115,8 +110,6 @@ const UpperNavbar: React.FC = () => {
     };
 
     document.addEventListener('keydown', handleTrapFocus);
-
-    // Focus first menu item on open
     firstElement?.focus();
 
     return () => {
@@ -183,7 +176,6 @@ const UpperNavbar: React.FC = () => {
               id="user-menu-button"
               type="button"
             >
-              {/* Avatar */}
               <img
                 src="https://i.pravatar.cc/40?img=12"
                 alt={`User Avatar of ${username}`}
@@ -224,7 +216,7 @@ const UpperNavbar: React.FC = () => {
             )}
           </nav>
 
-          {/* Cart without count badge */}
+          {/* Cart */}
           <button
             className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition focus:outline-none"
             aria-label="Shopping cart"
