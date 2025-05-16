@@ -3,17 +3,18 @@ import axios from 'axios';
 import { Plus, UploadCloud } from 'lucide-react';
 
 interface Product {
+  id: number;
   name: string;
   description: string;
-  price: string;
-  imageFile: File;
+  price: number; 
+  imagePath: string | File;
 }
 
 const ProductUploadForm: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePath, setImagePath] = useState<File | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,53 +26,57 @@ const ProductUploadForm: React.FC = () => {
     setName('');
     setDescription('');
     setPrice('');
-    setImageFile(null);
+    setImagePath(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleAddProduct = () => {
-    if (!name || !description || !price || !imageFile) {
+    if (!name || !description || !price || !imagePath) {
       setMessage('⚠️ Please fill all fields and choose an image.');
       return;
     }
 
-    const newProduct: Product = { name, description, price, imageFile };
+    const newProduct: Product = {
+      name, description, price: parseFloat(price), imagePath,
+      id: 0
+    };
     setProducts([...products, newProduct]);
     resetFields();
     setMessage('✅ Product added. Add more or upload all.');
   };
 
   const handleUploadAll = async () => {
-    if (products.length === 0) {
-      setMessage('⚠️ Add at least one product before uploading.');
-      return;
-    }
+  if (products.length === 0) {
+    setMessage('⚠️ Add at least one product before uploading.');
+    return;
+  }
 
-    setLoading(true);
-    setMessage('');
+  setLoading(true);
+  setMessage('');
 
-    try {
+  try {
+    for (const product of products) {
       const formData = new FormData();
-      products.forEach((product, index) => {
-        formData.append(`products[${index}][name]`, product.name);
-        formData.append(`products[${index}][description]`, product.description);
-        formData.append(`products[${index}][price]`, product.price);
-        formData.append(`products[${index}][image]`, product.imageFile);
-      });
+      formData.append('name', product.name);
+      formData.append('description', product.description);
+      formData.append('price', product.price.toString());
+      formData.append('image', product.imagePath); // key must match FileInterceptor('image')
 
-      await axios.post('http://localhost:3000/products/upload-multiple', formData, {
+      await axios.post('http://localhost:3000/products/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      setMessage(`🎉 Uploaded ${products.length} product(s) successfully!`);
-      setProducts([]);
-    } catch (error) {
-      console.error(error);
-      setMessage('❌ Failed to upload. Try again.');
-    } finally {
-      setLoading(false);
     }
-  };
+
+    setMessage(`🎉 Uploaded ${products.length} product(s) successfully!`);
+    setProducts([]);
+  } catch (error) {
+    console.error(error);
+    setMessage('❌ Failed to upload. Try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
@@ -121,7 +126,7 @@ const ProductUploadForm: React.FC = () => {
           accept="image/*"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            setImageFile(file || null);
+            setImagePath(file || null);
           }}
           className="hidden"
           ref={fileInputRef}
@@ -133,8 +138,8 @@ const ProductUploadForm: React.FC = () => {
         >
           Select Image
         </button>
-        {imageFile && (
-          <p className="text-sm text-gray-600 mt-2">Selected: {imageFile.name}</p>
+        {imagePath && (
+          <p className="text-sm text-gray-600 mt-2">Selected: {imagePath.name}</p>
         )}
       </label>
 
@@ -155,7 +160,7 @@ const ProductUploadForm: React.FC = () => {
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
         >
           <UploadCloud size={18} />
-          {loading ? 'Uploading...' : 'Upload All'}
+          {loading ? 'Uploading...' : 'Upload'}
         </button>
       </div>
 
@@ -183,7 +188,7 @@ const ProductUploadForm: React.FC = () => {
                 </div>
                 <div>
                   <img
-                    src={URL.createObjectURL(p.imageFile)}
+                    src={typeof p.imagePath === 'string' ? p.imagePath : URL.createObjectURL(p.imagePath)}
                     alt="Preview"
                     className="w-14 h-14 object-cover rounded"
                   />
