@@ -5,8 +5,8 @@ interface Product {
   id: number;
   name: string;
   description: string;
-  price: number;
-  imageUrl: string; // Assuming your backend provides a URL for the product image
+  price: number; 
+  imagePath: string;
 }
 
 const ProductList: React.FC = () => {
@@ -17,7 +17,7 @@ const ProductList: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/products'); // Replace with your API endpoint
+        const response = await axios.get('http://localhost:3000/products'); 
         setProducts(response.data);
       } catch (err) {
         console.error(err);
@@ -39,22 +39,25 @@ const ProductList: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
-      {products.map((product) => (
-        <div key={product.id} className="border rounded shadow p-4">
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-48 object-cover rounded mb-4"
-          />
-          <h3 className="text-lg font-bold">{product.name}</h3>
-          <p className="text-gray-600">{product.description}</p>
-          <p className="text-blue-600 font-semibold mt-2">
-            ${Number(product.price).toFixed(2)}
-            </p>
-        </div>
-      ))}
-    </div>
+    <div className="max-w-7xl mx-auto px-20 py-30">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    {products.map((product) => (
+      <div key={product.id} className="border rounded shadow p-4 bg-white">
+        <img
+          src={`http://localhost:3000/${product.imagePath}`}
+          alt={product.name}
+          className="w-full h-48 object-cover rounded mb-4"
+        />
+        <h3 className="text-lg font-bold">{product.name}</h3>
+        <p className="text-gray-600">{product.description}</p>
+        <p className="text-blue-600 font-semibold mt-2">
+          ₹{Number(product.price).toFixed(2)}
+        </p>
+      </div>
+    ))}
+  </div>
+</div>
+
   );
 };
 

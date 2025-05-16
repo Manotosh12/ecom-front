@@ -99,12 +99,12 @@ const ProductUploadForm: React.FC = () => {
       }
     }}
     required
-    className="hidden" // Hide the default file input
+    className="hidden" 
     id="fileInput"
   />
   <button
     type="button"
-    onClick={() => document.getElementById('fileInput')?.click()} // Trigger file input dialog
+    onClick={() => document.getElementById('fileInput')?.click()} 
     className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
   >
     Select Image
